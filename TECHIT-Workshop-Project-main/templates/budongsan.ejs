@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+        <meta name="description" content="" />
+        <meta name="author" content="" />
+        <title>부동산 매물</title>
+        <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+        <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        
+        <style>
+            #layoutSidenav_content_footer {
+                display: flex;
+                justify-content: flex-end;
+            }
+        </style>
+    </head>
+    <body>
+
+        <%- include('menu.ejs') %>
+
+        <div id="layoutSidenav">
+            <div id="layoutSidenav_content">
+                <main>
+                    <div class="container-fluid px-4">
+                        <h1 class="mt-4">부동산</h1>
+                        <ol class="breadcrumb mb-4">
+                            <li class="breadcrumb-item"><a href="/">Workshop</a></li>
+                            <li class="breadcrumb-item active">부동산</li>
+                        </ol>
+                        <div class="card mb-4"></div>
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <i class="fas fa-table me-1"></i>
+                                부동산 매물
+                            </div>
+                            <div class="card-body">
+                                <table id="datatablesSimple">
+                                    <thead>
+                                        <tr>
+                                            <th>이름</th>
+                                            <th>주소</th>
+                                            <th>매매가</th>
+                                            <th>전세가</th>
+                                            <th>날짜</th>
+                                        </tr>
+                                    </thead>
+                                    <tfoot>
+                                        <tr>
+                                            <th>이름</th>
+                                            <th>주소</th>
+                                            <th>매매가</th>
+                                            <th>전세가</th>
+                                            <th>날짜</th>
+                                        </tr>
+                                    </tfoot>
+                                    <tbody>
+                                    <% for(let i = 0; i < data.length; i++) {%>
+                                        <tr>
+                                            <td>
+                                                <a href="/budongsan/<%= data[i]._id %>" class="text-primary font-weight-bold">
+                                                    <%= data[i].title %>
+                                                </a>
+                                            </td>
+                                            <td><%= data[i].address %>, <%= data[i].city %></td>
+                                            <td><%= data[i].selling_price %></td>
+                                            <td><%= data[i].jeonse_price %></td>
+                                            <td><%= data[i].updated_at %></td>
+                                        </tr>
+                                    <% }%>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="card mb-4"></div>
+                        <div id="layoutSidenav_content_footer">
+                            <nav class="datatable-pagination">
+                                <ul class="datatable-pagination-list">
+                                <% if(number.startNumber == 1) {%>
+                                    <li class="datatable-pagination-list-item datatable-hidden datatable-disabled"><a data-page="0" class="datatable-pagination-list-item-link">‹</a></li>
+                                <% } else { %>
+                                    <li class="datatable-pagination-list-item"><a href="/budongsan?page=<%= number.startNumber - 1 %>" data-page="<%= number.startNumber - 1 %>" class="datatable-pagination-list-item-link"><</a></li>
+                                <% } %>
+        
+                                <% for(let i = number.startNumber; i < (number.startNumber + number.paginationWindowSize); i++) { %>
+                                    <% if(number.pageSize < i) { %>
+                                        <li class="datatable-pagination-list-item datatable-hidden datatable-disabled">
+                                            <a class="datatable-pagination-list-item-link"><%= i %></a>
+                                        </li>
+                                    <% } else { %>
+                                        <% if(number.currentPage == i) { %>
+                                            <li class="datatable-pagination-list-item datatable-active">
+                                                <a href="/budongsan?page=<%= i %>" data-page="<%= i %>" class="datatable-pagination-list-item-link"><%= i %></a>
+                                            </li>
+                                        <% } else { %>
+                                            <li class="datatable-pagination-list-item">
+                                                <a href="/budongsan?page=<%= i %>" data-page="<%= i %>" class="datatable-pagination-list-item-link"><%= i %></a>
+                                            </li>
+                                        <% } %>
+                                    <% } %>
+                                <% } %>
+        
+                                <% if(number.pageSize < number.startNumber + number.paginationWindowSize) {%>
+                                    <li class="datatable-pagination-list-item datatable-hidden datatable-disabled"><a data-page="0" class="datatable-pagination-list-item-link">></a></li>
+                                <% } else { %>
+                                    <li class="datatable-pagination-list-item"><a href="/budongsan?page=<%= number.startNumber + number.paginationWindowSize %>" data-page="<%= number.startNumber + number.paginationWindowSize %>" class="datatable-pagination-list-item-link">></a></li>
+                                <% } %>
+                                </ul>
+                                <br>
+                            </nav>
+                        </div>
+                    </div>
+                </main>
+
+                <footer class="py-4 bg-light mt-auto">
+                    <div class="container-fluid px-4">
+                        <div class="d-flex align-items-center justify-content-between small">
+                            <div class="text-muted">Copyright &copy; Workshop - 2024</div>
+                            <div>
+                                <a href="#">Privacy Policy</a>
+                                &middot;
+                                <a href="#">Terms &amp; Conditions</a>
+                            </div>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+        <script src="js/scripts.js"></script>
+        <script src="js/simple-datatables.min.js" crossorigin="anonymous"></script>
+        <script src="js/datatables-simple-demo.js"></script>
+    </body>
+</html>
