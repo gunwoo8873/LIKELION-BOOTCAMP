@@ -1,0 +1,32 @@
+{
+    "name": "front-repo",
+    "version": "1.0.0",
+    "main": "app.js",
+    "description": "A sample package.json",
+    "dependencies": {
+        "@faker-js/faker": "^8.4.1",
+        "@primer/css": "21.3.4",
+        "body-parser": "^1.20.2",
+        "cookie-parser": "^1.4.6",
+        "dotenv": "^16.4.5",
+        "ejs": "^3.1.10",
+        "http-proxy-middleware": "^3.0.0",
+        "express": "^4.19.2",
+        "express-session": "^1.18.0",
+        "fs": "^0.0.1-security",
+        "https": "^1.0.0",
+        "multer": "^1.4.5-lts.1",
+        "mysql2": "^3.10.2",
+        "passport": "^0.7.0",
+        "path": "^0.12.7",
+        "sha256": "^0.2.0"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "nodemon": "^3.1.4"
+    },
+    "scripts": {
+        "start": "node app.js",
+        "dev": "nodemon app.js"
+    }
+}

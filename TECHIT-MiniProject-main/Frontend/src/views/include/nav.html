@@ -1,0 +1,43 @@
+<div class="container d-flex align-items-center">
+
+    <div class="logo me-auto">
+        <h1><a href="/">SEVEN BANK</a></h1>
+        <!-- Uncomment below if you prefer to use an image logo -->
+        <!-- <a href="index.html"><img src="assets/img/logo.png" alt="" class="img-fluid"></a>-->
+    </div>
+
+    <nav id="navbar" class="navbar order-last order-lg-0">
+
+        <span id="loginSpan">
+            <!-- 경로 수정 -->
+            <form id="loginForm" action="/auth/login" method="post">
+                <!-- name 변경! -->
+                ID <input size="8" name="email">
+                PW <input size="8" name="password">
+                <input type="submit" value="login" class="btn btn-outline-info">
+            </form>
+        </span>
+
+        <ul>
+            <li><a class="nav-link scrollto active" href="/">홈</a></li>
+            <li><a class="nav-link scrollto" href="/register">회원가입</a></li>
+            <li><a class="nav-link scrollto" href="/mypage">마이페이지</a></li>
+            <li><a class="nav-link scrollto" href="/accounts">내 계좌</a></li>
+            <li><a class="nav-link scrollto " href="/transfer">송금</a></li>
+            <li class="dropdown"><a href="#"><span>게시판</span> <i class="bi bi-chevron-down"></i></a>
+                <ul>
+                    <li><a href="/notice">공지사항</a></li>
+                    <li><a href="/qna">QnA</a></li>
+                </ul>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+    </nav><!-- .navbar -->
+
+    <div class="header-social-links d-flex align-items-center">
+        <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+        <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></i></a>
+    </div>
+
+</div>

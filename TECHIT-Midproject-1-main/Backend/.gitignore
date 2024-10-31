@@ -1,0 +1,6 @@
+node_modules
+private.ini
+.env
+.vscode
+json/*.json
+backup/*

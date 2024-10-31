@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    <title>SEVEN BANK</title>
+    <meta content="" name="description">
+    <meta content="" name="keywords">
+
+    <%- include('include/head-link.html') %>
+
+        <!-- =======================================================
+  * Template Name: Lumia
+  * Template URL: https://bootstrapmade.com/lumia-bootstrap-business-template/
+  * Updated: Mar 17 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+
+        <!-- <style>
+    .outlined-table {
+        outline: 2px solid gray; /* Outline properties */
+        outline-offset: 5px;    /* Outline offset */
+    }
+    </style> -->
+        <style>
+            #image-input,
+            #file-input {
+                display: none;
+            }
+
+            #image-preview,
+            #file-preview {
+                display: flex;
+                overflow-x: auto;
+                margin-top: 10px;
+            }
+
+            #image-preview img {
+                width: 100px;
+                height: 100px;
+                object-fit: cover;
+                margin: 5px;
+                margin: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+
+            #file-preview span {
+                display: inline-block;
+                padding: 5px;
+                margin: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+                white-space: nowrap;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+        <script>
+
+            $(window).on('load', function () {
+
+                // 공지사항 작성
+                $('#form-create-notice').submit(function (event) {
+                    event.preventDefault();
+
+                    var formData = new FormData(this);
+                    $.ajax({
+                        url: '/api/notice',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (body) {
+                            console.log(body);
+                            alert('공지사항이 작성되었습니다.');
+                            loadNotice();
+                        },
+                    });
+                });
+
+                let loadNotice = () => {
+                    // 공지사항 불러오기
+                    $.ajax({
+                        url: '/api/notice',
+                        type: 'GET',
+                        success: function (body) {
+                            console.log(body);
+
+                            let data = body.data
+                            var table = $('#notice-table tbody');
+                            // for (var i = 0; i < data.length; i++) {
+                            //     var row = $('<tr>');
+                            //     row.append($('<th>').text(data[i].notice_id));
+                            //     row.append($('<td>').text(data[i].title));
+                            //     row.append($('<td>').text(data[i].created.substring(0, 10)));
+                            //     table.append(row);
+                            // }
+
+                            // 테이블 초기화
+                            table.html('');
+                            // 공지사항 테이블에 클릭하면 페이지 이동하도록 추가
+                            for (var i = 0; i < data.length; i++) {
+                                var row = $('<tr>');
+                                row.append($('<th>').text(data[i].notice_id));
+                                row.append($('<td>').html(`<a href="/notice/${data[i].notice_id}">${data[i].title}</a>`));
+                                row.append($('<td>').text(data[i].created.substring(0, 10)));
+                                table.append(row);
+                            }
+                        }
+                    });
+                }
+                loadNotice();
+
+
+                // 이미지 추가
+                $('#image-add-button').click(() => {
+                    $('#image-input').click();
+                });
+
+                // 이미지 미리보기
+                $('#image-input').change((event) => {
+                    const files = event.target.files;
+                    const preview = $('#image-preview');
+                    preview.html(''); // Clear previous previews
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            const div = $('<div style="position: relative; display: inline-block;">');
+                            const img = $('<img>');
+                            img.attr('src', e.target.result);
+                            // 이미지 우측 상단에 빨간색 제거 버튼
+                            const button = $('<button class="btn btn-danger btn-sm" style="position: absolute; right: 0; top: 0;">');
+                            button.text('삭제');
+                            button.click(() => {
+                                div.remove();
+                            });
+                            div.append(img);
+                            div.append(button);
+                            preview.append(div);
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+
+                // 파일 추가
+                $('#file-add-button').click(() => {
+                    $('#file-input').click();
+                });
+
+                // 파일 미리보기
+                $('#file-input').change((event) => {
+                    const files = event.target.files;
+                    const preview = $('#file-preview');
+                    preview.html(''); // Clear previous previews
+
+                    for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+
+                        reader.onload = (e) => {
+                            // span 태그로 파일명 표시 (제거 버튼 포함)
+                            const span = $('<span>');
+                            span.text(file.name);
+                            // 빨간색 제거 버튼
+                            const button = $('<button class="btn btn-danger btn-sm" style="margin-left: 10px;" >');
+                            button.text('삭제');
+                            button.click(() => {
+                                span.remove();
+                            });
+                            span.append(button);
+                            preview.append(span);
+                        };
+
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        </script>
+</head>
+
+<body>
+    <!-- ======= Header ======= -->
+    <header id="header" class="fixed-top d-flex align-items-center">
+        <%- include('include/nav.html') %>
+    </header><!-- End Header -->
+
+
+    <main id="main" style="margin-top: 100px;">
+
+
+        <div class="container">
+            <!-- Announcements Section -->
+            <div class="col">
+                <h2>공지사항</h2>
+                <table id="notice-table" class="table table-striped outlined-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">제 목</th>
+                            <th scope="col">작 성 일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                <!-- 작성 버튼 (배치 오른쪽) -->
+                <button type="button" class="btn btn-outline-primary" style="float: right;" data-bs-toggle="modal"
+                    data-bs-target="#noticeModal">작성</button>
+            </div>
+        </div>
+
+
+    </main><!-- End #main -->
+
+    <!-- ======= Footer ======= -->
+    <footer id="footer">
+
+        <div class="footer-top">
+            <div class="container">
+                <div class="row">
+
+                    <div class="col-lg-3 col-md-6 footer-contact">
+                        <h3>Seven bank</h3>
+                        <p>
+                            대한민국 KOR<br>
+                            서울 Seoul<br>
+                            종로구 종로3길 17<br>
+                            D1동 16층, 17층<br>
+                            03155<br>
+                            <br><br>
+                            <strong>Phone:</strong> +82 000 0000 0000 <br>
+                            <strong>Email:</strong> info@example.com<br>
+                        </p>
+                    </div>
+
+                    <div class="col-lg-5 col-md-6 footer-teaminfo">
+                        <h3>WEB Final Project_Team#7</h3>
+                        <p></p>
+                        <ul>
+                            <li>
+                                <h4>[조장] 손빈 : 프로젝트 파이팅 담당</h4>
+                            </li>
+                            <p></p>
+                            <li>
+                                <h4>[팀원] 윤현석 : 묵묵히 성실 작업 담당</h4>
+                            </li>
+                            <p></p>
+                            <li>
+                                <h4>[팀원] 채홍무 : 파이팅 호응 담당</h4>
+                            </li>
+                            <p></p>
+                            <li>
+                                <h4>[팀원] 최건우 : 경고 2장</h4>
+                            </li>
+                            <p></p>
+                        </ul>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6 footer-newsletter">
+                        <h4>Join Our Newsletter</h4>
+                        <p>Tamen quem nulla quae legam multos aute sint culpa legam noster magna</p>
+                        <form action="" method="post">
+                            <input type="email" name="email"><input type="submit" value="Subscribe">
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="container d-md-flex py-4">
+
+            <div class="me-md-auto text-center text-md-start">
+                <div class="copyright">
+                    &copy; Copyright <strong><span>Lumia</span></strong>. All Rights Reserved
+                </div>
+                <div class="credits">
+                    <!-- All the links in the footer should remain intact. -->
+                    <!-- You can delete the links only if you purchased the pro version. -->
+                    <!-- Licensing information: https://bootstrapmade.com/license/ -->
+                    <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/lumia-bootstrap-business-template/ -->
+                    Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+                </div>
+            </div>
+            <div class="social-links text-center text-md-right pt-3 pt-md-0">
+                <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
+                <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="#" class="google-plus"><i class="bx bxl-skype"></i></a>
+                <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            </div>
+        </div>
+    </footer><!-- End Footer -->
+
+    <!--부트스트랩 공지사항 작성 폼 (제목, 내용, 이미지 파일(복수), 첨부 파일(복수) - 이미지와 첨부파일 모두 하나씩 추가 가능해야 함)-->
+    <div class="modal fade" id="noticeModal" tabindex="-1" aria-labelledby="noticeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="noticeModalLabel">공지사항 작성</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-start">
+                    <form id="form-create-notice" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+                        <div class="mb-3">
+                            <label for="noticeTitle" class="col-form-label">제목:</label>
+                            <input type="text" class="form-control" id="noticeTitle" name="title">
+                        </div>
+                        <div class="mb-3">
+                            <label for="noticeContent" class="col-form-label">내용:</label>
+                            <!-- <textarea class="form-control" id="noticeContent" name="content" rows="5"></textarea> -->
+                            <textarea class="form-control" id="noticeContent" name="content" rows="5"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <input type="file" id="image-input" accept="image/*" name="imgs" multiple>
+                            <button type="button" id="image-add-button" class="btn btn-primary">이미지 추가</button>
+                            <div id="image-preview"></div>
+                        </div>
+                        <div class="mb-3">
+                            <input type="file" id="file-input" name="files" multiple>
+                            <button type="button" id="file-add-button" class="btn btn-primary">파일 추가</button>
+                            <div id="file-preview"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <input type="submit" class="btn btn-primary" value="작성">
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <%- include('include/body-js.html') %>
+
+</body>
+
+</html>

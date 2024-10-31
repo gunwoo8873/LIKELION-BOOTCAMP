@@ -1,0 +1,42 @@
+name: server-action.yml
+on:
+  push:
+    branches: [ "main" ]
+#  schedule: [cron: "* * * * 6"]
+
+jobs:
+  Checkout-Repo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        path: '${{ gihub.workspace }}/server'
+
+  Setup:
+    runs-on: ubuntu-latest
+    needs: Checkout-Repo
+    steps:
+      - name: Rust Install & Version
+        run: |
+          rustup install stable
+          rustup --version
+          cargo --version
+
+  Check:
+   runs-on: ubuntu-latest
+   needs: Setup
+   steps:
+     - name: Cargo Build
+       run: cargo build --release
+
+     - name: Cargo checking
+       run: cargo check
+
+  Test:
+   runs-on: ubuntu-latest
+   needs: Check
+   steps:
+     - name: Cargo Test
+       run: |
+        cd ../../server
+        cargo test

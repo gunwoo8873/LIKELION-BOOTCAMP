@@ -1,0 +1,9 @@
+node_modules
+private.ini
+.env
+.vscode
+rootca.*
+https*
+json/*.json
+backup/*
+public/image

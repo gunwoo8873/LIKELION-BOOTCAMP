@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts</title>
+
+    <%- include('include/head-link.html') %>
+        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+        <script src="/js/account.js"></script>
+</head>
+
+<body>
+    <!-- Header Section -->
+    <header id="header" class="fixed-top d-flex align-items-center">
+        <div class="container d-flex align-items-center">
+            <div class="logo me-auto">
+                <h1><a href="/">SEVEN BANK</a></h1>
+            </div>
+
+            <nav id="navbar" class="navbar order-last order-lg-0">
+                <ul>
+                    <li><a class="nav-link scrollto" href="/">Home</a></li>
+                    <li><a class="nav-link scrollto" href="/register">REGISTER</a></li>
+                    <li><a class="nav-link scrollto" href="/login">LOGIN</a></li>
+                    <li><a class="nav-link scrollto" href="/accounts">내 계좌</a></li>
+                </ul>
+                <i class="bi bi-list mobile-nav-toggle"></i>
+            </nav>
+
+            <div class="header-social-links d-flex align-items-center">
+                <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main" class="container mt-5 pt-5">
+        <section id="content">
+            <h2 id="welcomeMessage">내 계좌</h2>
+            <ul id="accountsList" class="list-group mb-3"></ul>
+            <div class="mb-3">
+                <input type="text" id="newAccountType" class="form-control" placeholder="계좌 유형">
+            </div>
+            <div class="mb-3">
+                <input type="password" id="newAccountPassword" class="form-control" placeholder="계좌 비밀번호">
+            </div>
+            <button id="addAccount" class="btn btn-primary">계좌 추가</button>
+        </section>
+    </main>
+
+    <!-- 송금 모달 -->
+    <div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="transferModalLabel">송금하기</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="transferForm">
+                        <div class="mb-3">
+                            <label for="recipientAccount" class="form-label">수신자 계좌 번호</label>
+                            <input type="text" class="form-control" id="recipientAccount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="transferAmount" class="form-label">송금 금액</label>
+                            <input type="number" class="form-control" id="transferAmount" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">송금</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Section -->
+    <footer id="footer">
+        <div class="container d-md-flex py-4">
+
+            <div class="me-md-auto text-center text-md-start">
+                <div class="copyright">
+                    &copy; Copyright <strong><span>Lumia</span></strong>. All Rights Reserved
+                </div>
+                <div class="credits">
+                    Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>
+                </div>
+            </div>
+            <div class="social-links text-center text-md-right pt-3 pt-md-0">
+                <a href="#" class="twitter"><i class="bx bxl-twitter"></i></a>
+                <a href="#" class="facebook"><i class="bx bxl-facebook"></i></a>
+                <a href="#" class="instagram"><i class="bx bxl-instagram"></i></a>
+                <a href="#" class="google-plus"><i class="bx bxl-skype"></i></a>
+                <a href="#" class="linkedin"><i class="bx bxl-linkedin"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i
+            class="bi bi-arrow-up-short"></i></a>
+
+    <%- include('include/body-js.html') %>
+</body>
+
+</html>

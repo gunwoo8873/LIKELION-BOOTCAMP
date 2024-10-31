@@ -1,0 +1,48 @@
+<nav class="navbar navbar-expand-lg bg-light">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Miniproject</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="/">홈</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/amm">자산관리</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/real-estate?page=1">부동산</a>
+        </li>
+      </ul>
+      <div class="navbar-nav ms-auto check-uid">
+        <a class="btn btn-outline-primary" href="/auth/login" id="loginA">로그인</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.cookie.js"></script>
+
+<script>
+  const uid=$.cookie('uid');
+  
+  if(uid) {
+    // $('.check-uid').html(/*html*/`<a class="btn btn-danger" href="/auth/logout" id="loginA">로그아웃</a>`);
+    $('.check-uid').html(/*html*/`
+    <div class="dropdown">
+      <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
+      환영합니다
+      </button>
+      <ul class="dropdown-menu">
+        <li><a class="dropdown-item" href="/auth/me">마이페이지</a></li>
+        <li><hr class="dropdown-divider"></hr></li>
+        <li><a class="dropdown-item" href="/auth/logout">로그아웃</a></li>
+      </ul>
+    </div>
+    `);
+  }
+</script>

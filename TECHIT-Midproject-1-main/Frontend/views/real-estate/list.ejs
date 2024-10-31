@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if (typeof csrfToken !='undefined' && csrfToken) {%>
+        <meta name="csrf-token" content="<%= csrfToken %>">
+        <% } %>
+            <title>부동산 매물</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+                integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+                crossorigin="anonymous">
+            <style>
+                .bAddr {
+                    max-height: 200px;
+                    padding: 20px;
+                }
+
+                .bAddr>div {
+                    margin-bottom: 20px;
+                    /* 각 주소 정보 사이에 여백 추가 */
+                }
+            </style>
+</head>
+
+<body>
+    <%- include('../menu.html') %>
+        <p></p>
+        <form action="/real-estate/search">
+            <div class="container input-group m1-2 my-3">
+                <div class="input-group-prepend ">
+                    <select class="custom-select option-select form-select" name="selectv">
+                        <option value="id" name="id">매물번호</option>
+                        <option value="user_id" name="user_id">사용자 ID</option>
+                        <option value="address" name="address">주소</option>
+                        <option value="area" name="area">면적</option>
+                    </select>
+                </div>
+                <input class="form-control sword ms-3" name="sword" type="search" placeholder="검색어 입력">
+                <div class="input-group-append ms-3">
+                    <button class="btn btn-primary sbtn">검색하기</button>
+                </div>
+            </div>
+        </form>
+
+
+        <div style="height: 700px;">
+            <table class="table table-hover table-striped text-center container mt-4" style="border: 1px solid;">
+                <thead>
+                    <tr>
+                        <th>매물번호</th>
+                        <th>주소</th>
+                        <th>면적<span style="font-size: 12px;">(평)</span></th>
+                        <th>매매가격</th>
+                        <th>전세가격</th>
+                        <th>등록일</th>
+                        <th>상태</th>
+                        <th>삭제</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for(let i=0; i < data.length; i++){ %>
+                        <tr>
+                            <td>
+                                <%= data[i].id %>
+                            </td>
+                            <td>
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#myModal"
+                                    onclick="modal_content(`<%= data[i].id %>`,`<%= data[i].user_id %>`,`<%= data[i].apartment %>`,`<%= data[i].address %>`,`<%= data[i].city %>`,`<%= data[i].area %>`,`<%= data[i].imagepath %>`,`<%= data[i].selling_price %>`,`<%= data[i].jeonse_price %>`,`<%= data[i].status %>`)">
+                                    <%= data[i].address %>
+                                </a>
+                            </td>
+                            <td>
+                                <%= data[i].area %>평
+                            </td>
+                            <td data-price="<%= data[i].selling_price %>">
+                                <%= data[i].selling_price %>원
+                            </td>
+                            <td data-price="<%= data[i].jeonse_price %>">
+                                <%= data[i].jeonse_price %>원
+                            </td>
+                            <td>
+                                <%= data[i].created_at.replace('T', ' ' ).replace('.000Z', '' ) %>
+                            </td>
+                            <td>
+                                <%= data[i].status %>
+                            </td>
+                            <td>
+                                <button class="delete btn btn-outline-danger" data-id="<%= data[i].id %>">삭제</button>
+                            </td>
+                        </tr>
+                        <% } %>
+                            <% if (typeof data !='undefined' && data.real_estate) { %>
+                                <% for(let i=0; i < data.real_estate.length; i++){ %>
+                                    <tr>
+                                        <td>
+                                            <%= data.real_estate[i].id %>
+                                        </td>
+                                        <td>
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#myModal"
+                                                onclick="modal_content(`<%= data.real_estate[i].id %>`,`<%= data.real_estate[i].user_id %>`,`<%= data.real_estate[i].apartment %>`,`<%= data.real_estate[i].address %>`,`<%= data.real_estate[i].city %>`,`<%= data.real_estate[i].area %>`,`<%= data.real_estate[i].imagepath %>`,`<%= data.real_estate[i].selling_price %>`,`<%= data.real_estate[i].jeonse_price %>`,`<%= data.real_estate[i].status %>`)">
+                                                <%= data.real_estate[i].address %>
+                                            </a>
+                                        </td>
+                                        <td>
+                                            <%= data.real_estate[i].area %>
+                                        </td>
+                                        <td>
+                                            <%= data.real_estate[i].selling_price %>
+                                        </td>
+                                        <td>
+                                            <%= data.real_estate[i].jeonse_price %>
+                                        </td>
+                                        <td>
+                                            <%= data.real_estate[i].created_at %>
+                                        </td>
+                                        <td>
+                                            <%= data.real_estate[i].status %>
+                                        </td>
+                                        <td>
+                                            <button class="delete btn btn-outline-danger"
+                                                data-id="<%= data.real_estate[i].id %>">삭제</button>
+                                        </td>
+                                    </tr>
+                                    <% } %>
+                                        <% } %>
+                </tbody>
+            </table>
+            <div class="container d-flex justify-content-between align-items-center" style="margin-top: 13px;">
+                <!-- 빈 div로 flexbox 공간을 확보 -->
+                <div class="flex-grow-1 d-flex justify-content-center">
+                    <nav aria-label="Page navigation example">
+                        <ul class="pagination m-0">
+                            <% for (let i=1; i <=totalPages; i++) { %>
+                                <li class="page-item <%= currentPage == i ? 'active' : '' %>">
+                                    <a class="page-link" href="/real-estate?page=<%= i %>">
+                                        <%= i %>
+                                    </a>
+                                </li>
+                                <% } %>
+                        </ul>
+                    </nav>
+                </div>
+                <a href="/real-estate/enter" class="btn btn-primary" style="border: none;">등록하기</a>
+            </div>
+        </div>
+        <% if (typeof data !='undefined' && data.alertMsg) { %>
+            <script>alert('<%= data.alertMsg %>');</script>
+            <% } %>
+
+                <% if (typeof data !='undefined' && data.confirmMsg) { %>
+                    <script>confirm('<%= data.confirmMsg %>');</script>
+                    <% } %>
+
+                        </div>
+
+                        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+                        <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=<%= appkey %>&libraries=services"></script>
+                        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+                        <script>
+                            $(document).ready(function () {
+                                const urlParams = new URLSearchParams(window.location.search);
+                                const message = urlParams.get('alertMsg');
+                                if (message) {
+                                    alert(message);
+                                    // URL에서 message 파라미터 제거
+                                    window.history.replaceState({}, document.title, window.location.pathname);
+                                }
+                            });
+                        </script>
+
+                        <script>
+
+                            var map;
+                            var marker = null; // 전역 변수로 마커를 선언합니다
+                            var infowindow = new kakao.maps.InfoWindow({ removable: true }); // 인포윈도우 전역 변수로 선언
+
+                            function modal_content(id, user_id, apartment, address, city, area, imagepath, selling_price, jeonse_price, status) {
+                                // 주소를 이용해 위도 경도를 얻어오는 Geocoder 객체 생성
+                                var geocoder = new kakao.maps.services.Geocoder();
+
+                                // 주소로 좌표를 검색
+                                geocoder.addressSearch(address, function (result, statusOk) {
+                                    // 정상적으로 검색이 완료됐으면
+                                    if (statusOk === kakao.maps.services.Status.OK) {
+                                        var lat = result[0].y; // 위도
+                                        var lng = result[0].x; // 경도
+
+                                        // 모달에 표시할 데이터 설정
+                                        var modalData = {
+                                            id,
+                                            user_id,
+                                            apartment,
+                                            address,
+                                            city,
+                                            area,
+                                            imagepath,
+                                            selling_price,
+                                            jeonse_price,
+                                            lat,
+                                            lng,
+                                            status
+                                        };
+
+                                        var sumAddress = `${modalData.address}`;
+
+                                        if (`${modalData.status}` == '판매 완료') {
+                                            $("#hidStatus").css("color", "red");
+                                            $("#hidStatus").text(`${modalData.status}`);
+                                            $("#realId").text(`${modalData.id}`);
+                                            $("#realUser_id").text(`${modalData.user_id}`);
+                                            $("#realApartment").text(`${modalData.apartment}`);
+                                            $("#realAddress").text(`${modalData.address}`);
+                                            $("#realCity").text(`${modalData.city}`);
+                                            $("#realArea").text(`${modalData.area}`);
+                                            $("#realImg").html(`<div style="margin:20px"><img width='430px' height="300px" src='/image/${modalData.imagepath}'></div>`);
+                                            $("#realselling_price").text(`${parseFloat(modalData.selling_price).toLocaleString()}`);
+                                            $("#realJeonse_price").text(`${parseFloat(modalData.jeonse_price).toLocaleString()}`);
+                                            $("#realFullAddress").text(sumAddress);
+                                            // 구매하기 버튼 숨기기
+                                            $('#buySpan').html(`<button type="button" class="btn btn-primary d-none" onclick="buyBtn()">구매하기</button>`);
+                                            // 수정하러가기 버튼 숨기기
+                                            $('#updateSpan').html(`<button type="button" class="btn btn-info d-none" style="color: white;" onclick="editDisplay()">수정하러가기</button>`);
+
+                                            // 모달이 열릴 때마다 지도 초기화
+                                            initMap(modalData.lat, modalData.lng);
+                                            $('#myModal').modal('show');
+                                        } else {
+                                            $("#hidStatus").css("color", "black");
+                                            $("#hidStatus").html(`<h2>${modalData.status}</h2>`)
+                                            $("#realId").text(`${modalData.id}`);
+                                            $("#realUser_id").text(`${modalData.user_id}`);
+                                            $("#realApartment").text(`${modalData.apartment}`);
+                                            $("#realAddress").text(`${modalData.address}`);
+                                            $("#realCity").text(`${modalData.city}`);
+                                            $("#realArea").text(`${modalData.area}`);
+                                            $("#realImg").html(`<div style="margin:20px"><img width='430px' height="300px" src='/image/${modalData.imagepath}'></div>`);
+                                            $("#realselling_price").text(`${parseFloat(modalData.selling_price).toLocaleString()}`);
+                                            $("#realJeonse_price").text(`${parseFloat(modalData.jeonse_price).toLocaleString()}`);
+                                            $("#realFullAddress").text(sumAddress);
+
+                                            // 모달이 열릴 때마다 지도 초기화
+                                            initMap(modalData.lat, modalData.lng);
+
+                                            // 구매 버튼 설정
+                                            $('#buySpan').html(`<button type="button" class="btn btn-primary" onclick="buyBtn()">구매하기</button>`);
+
+                                            // 수정 버튼 설정
+                                            $('#updateSpan').html(`<button type="button" class="btn btn-info" style="color: white;" onclick="editDisplay()">수정하러가기</button>`);
+
+                                            $('#myModal').modal('show');
+
+                                        }
+                                    }
+                                });
+                            }
+                            $.ajax({
+                                type: 'POST',
+                                url: '/real-estate/', // 서버 측 엔드포인트 경로
+                                data: { id: id },
+                                success: function (response) {
+
+                                },
+                                error: function (xhr, textStatus, err) {
+                                    console.error('인증실패', err);
+                                    alert('본인만 수정 가능합니다.');
+                                }
+                            });
+
+                            function editDisplay() {
+                                var id = $("#realId").text();
+                                var user_id = $("#realUser_id").text();
+                                var apartment = $("#realApartment").text();
+                                var address = $("#realAddress").text();
+                                var city = $("#realCity").text();
+                                var area = $("#realArea").text();
+                                var imagepath = $("#realImg img").attr('src').split('/').pop();
+                                var selling_price = $("#realselling_price").text();
+                                var jeonse_price = $("#realJeonse_price").text();
+
+                                // 각 필드를 수정 가능한 입력 상자로 교체
+                                $("#realId").html(`<span>${id}</span>`);
+                                $("#realHiddenId").html(`<input type="hidden" name="id" value="${id}">`);
+                                $("#realUser_id").html(`<span>${user_id}</span>`);
+                                $('#realApartment').html(`<span name='apartment''>${apartment}</span>`);
+                                $("#hidrealApartment").html(`<input type="hidden" name="apartment" value="${apartment}">`);
+                                $('#realAddress').html(`<span name='address'>${address}</span>`);
+                                $("#hidrealAddress").html(`<input type="hidden" name="address" value="${address}">`);
+                                $('#realCity').html(`<br><span name='city'>${city}</span>`);
+                                $("#hidrealCity").html(`<input type="hidden" name="city" value="${city}">`);
+                                $("#realArea").html(`<div class="row"><div class="mb-3 col-md-5"><input class="form-control" type='text' name='area' value='${area}'></div></div>`);
+                                if (imagepath) {
+                                    $("#realImg").html(`
+        <div id="imageContainer" style="position: relative; margin: 20px;">
+            <img id="previewImage" width='430px' height="300px" src='/image/${imagepath}'>
+            <button type="button" class="btn btn-danger btn-sm" style="position: absolute; top: 5px; right: 5px;" onclick="deleteImage()">X</button>
+        </div>
+    `);
+                                } else {
+                                    $("#realImg").html(`<input class="form-control" type='file' name='imagepath'>`);
+                                }
+
+                                $("#realselling_price").html(`<div class="row"><div class="mb-3 col-md-5"><input class="form-control " type='text' name='selling_price' value='${selling_price}'></div></div>`);
+                                $("#realJeonse_price").html(`<div class="row"><div class="mb-3 col-md-5"><input class="form-control" type='text' name='jeonse_price' value='${jeonse_price}'></div></div>`);
+
+                                // 수정 버튼 설정
+                                $('#updateSpan').html(`<button type="submit" class="btn btn-warning">수정</button>`);
+                            }
+
+                            // 이미지 삭제 함수
+                            function deleteImage() {
+                                // 이미지 삭제 로직을 여기에 추가
+                                imagepath = ''; // 이미지 변수 초기화
+                                $("#realImg").html(`<input class="form-control" type='file' name='imagepath'>`);
+                            }
+                            var map;
+                            var marker = null; // 전역 변수로 마커를 선언합니다
+                            var infowindow = new kakao.maps.InfoWindow({ removable: true }); // 인포윈도우 전역 변수로 선언
+
+                            function initMap(lat, lng) {
+                                var container = document.getElementById('map');
+                                var options = {
+                                    center: new kakao.maps.LatLng(lat, lng), // 초기 지도 중심 좌표 (서울)
+                                    level: 3 // 초기 지도 확대 레벨
+                                };
+
+                                map = new kakao.maps.Map(container, options);
+
+                                // 이전 마커 제거
+                                if (marker) {
+                                    marker.setMap(null);
+                                }
+
+                                // 새로운 마커 생성
+                                marker = new kakao.maps.Marker({
+                                    position: new kakao.maps.LatLng(lat, lng),
+                                    map: map
+                                });
+
+                                // 인포윈도우 설정
+                                var content = '<div class="bAddr">' +
+                                    '<span class="title">현재 위치</span>' +
+                                    '</div>';
+                                infowindow.setContent(content);
+                                infowindow.open(map, marker);
+                            }
+
+                            // Kakao Maps API 로드가 완료되면 initMap 함수 호출
+                            kakao.maps.event.addDomListener(window, 'load', initMap);
+
+
+                        </script>
+
+                        <script>
+                            $('.delete').click(function (e) {
+                                let item = $(this);
+                                let id = e.target.dataset.id;
+
+                                if (confirm('삭제하시겠습니까??')) {
+                                    $.ajax({
+                                        type: 'post',
+                                        url: '/real-estate/delete',
+                                        data: { id: id }
+                                    })
+                                    .done(function (result) {
+                                        item.parent('td').parent('tr').remove();
+                                    })
+                                    .fail(function (xhr, textStatus, err) {
+                                        alert(xhr, textStatus, err);
+                                    });
+                                } else {
+                                    console.log('삭제가 취소되었습니다.');
+                                }
+                            });
+                        </script>
+
+                        <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+                        <script>
+                            function addressSearch() {
+                                new daum.Postcode({
+                                    oncomplete: function (data) {
+                                        // 팝업에서 검색결과 항목을 클릭했을때 실행할 코드를 작성하는 부분.
+
+                                        // 각 주소의 노출 규칙에 따라 주소를 조합한다.
+                                        // 내려오는 변수가 값이 없는 경우엔 공백('')값을 가지므로, 이를 참고하여 분기 한다.
+                                        var addr = ''; // 주소 변수
+                                        var extraAddr = ''; // 참고항목 변수
+
+                                        //사용자가 선택한 주소 타입에 따라 해당 주소 값을 가져온다.
+                                        if (data.userSelectedType === 'R') { // 사용자가 도로명 주소를 선택했을 경우
+                                            addr = data.roadAddress;
+                                        } else { // 사용자가 지번 주소를 선택했을 경우(J)
+                                            addr = data.jibunAddress;
+                                        }
+
+                                        // 사용자가 선택한 주소가 도로명 타입일때 참고항목을 조합한다.
+                                        if (data.userSelectedType === 'R') {
+                                            // 법정동명이 있을 경우 추가한다. (법정리는 제외)
+                                            // 법정동의 경우 마지막 문자가 "동/로/가"로 끝난다.
+                                            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                                                extraAddr += data.bname;
+                                            }
+                                            // 건물명이 있고, 공동주택일 경우 추가한다.
+                                            if (data.buildingName !== '' && data.apartment === 'Y') {
+                                                extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                                            }
+                                            // 표시할 참고항목이 있을 경우, 괄호까지 추가한 최종 문자열을 만든다.
+                                            if (extraAddr !== '') {
+                                                extraAddr = ' (' + extraAddr + ')';
+                                            }
+                                            // 조합된 참고항목을 해당 필드에 넣는다.
+                                            document.getElementById("city").value = extraAddr;
+
+                                        } else {
+                                            document.getElementById("city").value = '';
+                                        }
+
+                                        // 우편번호와 주소 정보를 해당 필드에 넣는다.
+                                        document.getElementById("address").value = addr;
+                                        // 커서를 상세주소 필드로 이동한다.
+                                    }
+                                }).open();
+                            }
+
+                            function buyBtn() {
+                                var id = $("#realId").text();
+                                // 확인 다이얼로그를 통해 사용자에게 구매 여부를 다시 확인
+                                if (confirm('정말로 구매를 하시겠습니까?')) {
+                                    // AJAX 요청을 통해 서버에 판매 완료 상태로 변경 요청을 보냄
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: '/real-estate/selling', // 서버 측 엔드포인트 경로
+                                        data: { id: id },
+                                        success: function (response) {
+                                            alert('구매완료');
+                                            location.reload();  // 페이지 새로고침
+                                        },
+                                        error: function (xhr, textStatus, err) {
+                                            console.error('판매 완료로 변경 실패:', err);
+                                            alert('판매 완료 상태 변경에 실패했습니다. 다시 시도해 주세요.');
+                                        }
+                                    });
+                                } else {
+                                    console.log('구매 완료가 취소되었습니다.');
+                                }
+                            }
+                        </script>
+
+                        <!-- The Modal -->
+                        <form action="/real-estate/edit" method="post">
+                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                            <div class="modal" id="myModal">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <!-- Modal Header -->
+                                        <div class="modal-header">
+                                            <div>
+                                                <h2><span id="hidStatus" name="status"></span></h2>
+                                                <br>
+                                                <div> 매물번호 :
+                                                    <span style="font-size: 24px;" id="realId" name="id"></span>
+                                                </div>
+                                            </div>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <span id="realHiddenId"></span>
+
+                                        <!-- Modal body -->
+                                        <div class="modal-body">
+
+                                            <div><span style="font-weight: bold;"> 판매자 ID : </span><span
+                                                    id="realUser_id" name="user_id"></span></div>
+                                            <p></p>
+                                            <div>
+                                                <span style="font-weight: bold;"> 주소 : </span>
+                                                <span id="realAddress" name="address"></span>
+                                                <span id="hidrealAddress"></span>
+                                                <span name="city" id="realCity"></span>
+                                                <span id="hidrealCity"></span>
+                                                <span id="realApartment" name="apartment"></span>
+                                                <span id="hidrealApartment"></span>
+                                            </div>
+                                            <div><span style="font-weight: bold;"> 면적 : </span><span
+                                                    id="realArea"></span>평</div>
+                                            <div><span style="font-weight: bold;"> 매매 가격 : </span><span
+                                                    id="realselling_price" name="selling_price"></span>원
+                                            </div>
+                                            <div><span style="font-weight: bold;"> 전세 가격 : </span><span
+                                                    id="realJeonse_price"></span>원</div>
+                                            <p></p>
+                                            <div id="map" style="width:100%; height:500px; border: solid 1px;"></div>
+                                            <div id="imageContainer">
+                                                <span id="realImg" name="imagepath"></span>
+                                            </div>
+
+                                        </div>
+
+                                        <!-- Modal footer -->
+                                        <div class="modal-footer">
+                                            <span id="buySpan">
+                                                <button onclick="buyBtn()"></button>
+                                            </span>
+                                            <span id="updateSpan">
+                                                <button></button>
+                                            </span>
+
+                                            <button type="button" class="btn btn-danger"
+                                                data-bs-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <script>
+                            document.addEventListener("DOMContentLoaded", function () {
+                                var priceElements = document.querySelectorAll('[data-price]');
+
+                                priceElements.forEach(function (element) {
+                                    var price = parseFloat(element.getAttribute('data-price'));
+                                    element.textContent = price.toLocaleString() + '원';
+                                });
+                            });
+                        </script>
+</body>
+
+</html>

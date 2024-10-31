@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <% if (typeof csrfToken != 'undefined' && csrfToken) {%>
+    <meta name="csrf-token" content="<%= csrfToken %>">
+    <% } %>
+    <title>자산관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+</head>
+
+<body>
+    <%- include('../menu.html') %>
+        <div class="container">
+            <div class="mt-5">
+                <div class="d-flex">
+                    <select id="accountList" class="form-select w-25" aria-label="Default select example">
+                    </select>
+                    <select id="filterOption" class="form-select ms-3" aria-label="Default select example"
+                        style="width: 120px;">
+                        <option value="all" selected>전체</option>
+                        <option value="deposit">입금</option>
+                        <option value="withdraw">출금</option>
+                        <option value="exchange">환전</option>
+                    </select>
+                    <button type="button" class="btn btn-primary ms-3" data-bs-toggle="modal"
+                        data-bs-target="#CreateAccountModal">
+                        계좌 개설
+                    </button>
+                    <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal"
+                        data-bs-target="#DepositWithdrawModal" data-bs-whatever="입출금">입출금</button>
+                    <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal"
+                        data-bs-target="#TransferModal" data-bs-whatever="송금">송금</button>
+                    <button type="button" class="btn btn-primary ms-2" data-bs-toggle="modal"
+                        data-bs-target="#ExchangeModal" data-bs-whatever="환전">환전</button>
+                </div>
+
+                <div class="mt-5">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">거래일자</th>
+                                <th scope="col">계좌번호</th>
+                                <th scope="col">거래형태</th>
+                                <th scope="col">보낸분/받는분</th>
+                                <th scope="col">입금(원)</th>
+                                <th scope="col">출금(원)</th>
+                                <th scope="col">잔액(원)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <!-- 거래 내역 추가 -->
+                        </tbody>
+                    </table>
+                    <nav>
+                        <ul class="pagination justify-content-center" id="pagination">
+                            <!-- 페이지네이션 추가 -->
+                        </ul>
+                    </nav>
+                </div>
+
+                <!-- Create Account Modal -->
+                <div class="modal fade" id="CreateAccountModal" tabindex="-1" aria-labelledby="CreateAccountModalLabel"
+                    aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="CreateAccountModalLabel">계좌 생성</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                    aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form>
+                                    <div class="mb-3">
+                                        <label for="account-alias" class="col-form-label">계좌 별명</label>
+                                        <input type="text" class="form-control" id="account-alias"
+                                            placeholder="계좌 별명을 입력하세요">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="accountPw" class="col-form-label">계좌 비밀번호 설정</label>
+                                        <input type="password" class="form-control" id="accountPw" maxlength="4"
+                                            placeholder="비밀번호를 4자리 숫자로 입력하세요">
+                                    </div>
+                                    <div class="mb-3">
+                                        <input type="password" class="form-control" id="accountpw-check" maxlength="4"
+                                            placeholder="비밀번호를 한 번 더 입력하세요">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="initial-deposit" class="col-form-label">초기 입금</label>
+                                        <input type="number" class="form-control" id="initial-deposit" step="10000"
+                                            min="0" placeholder="초기 입금액을 입력하세요">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary createAccount">계좌 생성</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- DepositWithdraw Modal -->
+        <div class="modal fade" id="DepositWithdrawModal" tabindex="-1" aria-labelledby="DepositWithdrawModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="DepositWithdrawModalLabel">입출금</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="my-account" class="col-form-label">내 계좌</label>
+                                <select class="form-select" id="my-account"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="DepositWithdrawBalance" class="col-form-label">잔액</label>
+                                <span id="DepositWithdrawBalance"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="amount" class="col-form-label">금액</label>
+                                <input type="number" class="form-control" id="amount" step="10000" min="0"
+                                    placeholder=" 금액을 입력하세요">
+                            </div>
+                            <div class="mb-3">
+                                <label for="DepositWithdrawPw" class="col-form-label">계좌 비밀번호</label>
+                                <input type="password" class="form-control" id="DepositWithdrawPw" maxlength="4"
+                                    placeholder="계좌 비밀번호를 입력하세요">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary depositbtn">입금</button>
+                        <button type="button" class="btn btn-primary withdrawbtn">출금</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transfer Modal -->
+        <div class="modal fade" id="TransferModal" tabindex="-1" aria-labelledby="TransferModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TransferModalLabel">송금</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label for="sender-account" class="col-form-label">내 계좌</label>
+                                <select class="form-select" id="sender-account"></select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="transferBalance" class="col-form-label">잔액</label>
+                                <span id="transferBalance"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label for="receiver-account" class="col-form-label">받을 사람 계좌</label>
+                                <input type="text" class="form-control" id="receiver-account" placeholder="계좌번호를 입력하세요">
+                            </div>
+                            <div class="mb-3">
+                                <label for="transfer-amount" class="col-form-label">금액</label>
+                                <input type="number" class="form-control" id="transfer-amount" step="10000" min="0"
+                                    placeholder="금액을 입력하세요">
+                            </div>
+                            <div class="mb-3">
+                                <label for="transferPw" class="col-form-label">계좌 비밀번호</label>
+                                <input type="password" class="form-control" id="transferPw" maxlength="4"
+                                    placeholder="계좌 비밀번호를 입력하세요">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary transferbtn">송금</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Exchange Modal -->
+        <div class="modal fade" id="ExchangeModal" tabindex="-1" aria-labelledby="ExchangeModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="ExchangeModalLabel">환전</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <select class="form-select" id="exchange-account"></select>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exchangeBalance" class="col-form-label">잔액</label>
+                                <span id="exchangeBalance"></span>
+                            </div>
+                            <div class="mb-3 d-flex mt-1">
+                                <select id="exchange-currency" class="form-select"
+                                    style="width: 120px; margin-right: 10px;">
+                                    <option value="">통화선택</option>
+                                    <option value="USD">USD</option>
+                                    <option value="JPY">JPY</option>
+                                    <option value="EUR">EUR</option>
+                                    <option value="CNY">CNY</option>
+                                </select>
+                                <input type="number" class="form-control" id="exchange-amount" step="100" min="0"
+                                    placeholder="통화선택 후 직접입력">
+                            </div>
+                            <div class="mb-3">
+                                <label for="expectedKRW" class="col-form-label"></label>
+                                <span id="expectedKRW"></span>
+                                <button type="button" class="btn btn-sm btn-primary" id="calculateExchange">계산</button>
+                            </div>
+                            <div class="mb-3">
+                                <label for="exchangePw" class="col-form-label">계좌 비밀번호</label>
+                                <input type="password" class="form-control" id="exchangePw" maxlength="4"
+                                    placeholder="계좌 비밀번호를 입력하세요">
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+
+                        <button type="button" class="btn btn-primary exchangebtn">환전</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+        <script>
+            // 정렬 옵션 전역 변수로 선언 후 초기화
+            let selectedAccount = '';
+            let selectedFilter = 'all';
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+            // 환율 데이터를 저장
+            const exchangeRates = {
+                USD: 1377.56,
+                JPY: 8.57,
+                EUR: 1493.34,
+                CNY: 189.52
+            };
+
+            function getExchangeRate(currencyUnit) {
+                return exchangeRates[currencyUnit] || 0;
+            }
+
+            // 페이지 로드 시 전체 거래 내역 불러오기
+            async function loadTransactions(account = '', filter = 'all', page = 1) {
+                try {
+                    const response = await fetch(`/amm/transactions?account=${account}&filter=${filter}&page=${page}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken
+                        }
+                    });
+                    if (!response.ok) throw new Error('error');
+
+                    const data = await response.json();
+                    return data;
+                } catch (err) {
+                    console.error(err);
+                    return { transactions: [], page: 1, pageCount: 1, totalTransactions: 0 };
+                }
+            }
+
+            function updateTransactionsTable(data) {
+                const transactionTableBody = $('#historyTable');
+                transactionTableBody.empty(); // 기존 내용 초기화
+
+                data.transactions.forEach(transaction => {
+                    const row = $('<tr>');
+                    const formattedDate = transaction.transaction_date.replace('T', ' ').replace('.000Z', '');
+                    const formattedAccountNumber = transaction.account_number.substring(0, 3) + '-' + transaction.account_number.substring(3, 6) + '-' + transaction.account_number.substring(6);
+                    row.append($('<td>').text(formattedDate));
+                    row.append($('<td>').text(formattedAccountNumber));
+                    row.append($('<td>').text(transactionType(transaction.transaction_type)));
+                    row.append($('<td>').text(transaction.counterparty_name === null ? '-' : transaction.counterparty_name));
+                    row.append($('<td>').text(transaction.transaction_type === 'deposit' ? parseFloat(transaction.amount).toLocaleString() : '-'));
+                    row.append($('<td>').text(transaction.transaction_type === 'deposit' ? '-' : parseFloat(transaction.amount).toLocaleString()));
+                    row.append($('<td>').text(parseFloat(transaction.balance).toLocaleString()));
+                    transactionTableBody.append(row);
+                });
+
+                setupPagination(data.page, data.pageCount);
+            }
+
+            function setupPagination(currentPage, pageCount) {
+                const pagination = $('#pagination');
+                pagination.empty(); // 기존 페이지네이션 초기화
+
+                for (let i = 1; i <= pageCount; i++) {
+                    const pageItem = $('<li>').addClass('page-item').addClass(i === currentPage ? 'active' : '');
+                    const pageLink = $('<a>').addClass('page-link').text(i).attr('href', '#').click(function (event) {
+                        event.preventDefault();
+                        loadAndRenderTransactions(selectedAccount, selectedFilter, i);
+                    });
+                    pageItem.append(pageLink);
+                    pagination.append(pageItem);
+                }
+            }
+
+            async function loadAndRenderTransactions(account = '', filter = 'all', page = 1) {
+                const data = await loadTransactions(account, filter, page);
+                updateTransactionsTable(data);
+            }
+
+            function transactionType(type) {
+                switch (type) {
+                    case 'deposit':
+                        return '입금';
+                    case 'withdraw':
+                        return '출금';
+                    case 'exchange':
+                        return '환전';
+                    default:
+                        return type;
+                }
+            }
+
+            // 계좌 목록 가져오기 및 업데이트
+            async function accountSelect(selectId, isModal = false) {
+                try {
+                    const response = await fetch('/amm/accounts', { method: 'GET' });
+                    if (!response.ok) throw new Error('error');
+
+                    const accounts = await response.json();
+                    const accountSelect = $(`#${selectId}`);
+                    accountSelect.empty(); // 초기화
+
+                    const defaultOption = $('<option>').val('').text('==계좌를 선택해주세요==').prop('selected', true);
+                    accountSelect.append(defaultOption);
+
+                    accounts.forEach(account => {
+                        const formattedAccountNumber = account.account_number.substring(0, 3) + '-' + account.account_number.substring(3, 6) + '-' + account.account_number.substring(6);
+                        const displayText = `${account.account_alias} (${formattedAccountNumber})`;
+                        const option = $('<option>').val(account.account_number).text(displayText);
+                        accountSelect.append(option);
+                    });
+
+                    if (!isModal) {
+                        accountSelect.off('change').on('change', function () {
+                            selectedAccount = $(this).val() || '';
+                            loadAndRenderTransactions(selectedAccount, selectedFilter);
+                        });
+                    }
+                } catch (err) {
+                    console.error(err);
+                }
+            }
+
+            // 모달에서 계좌를 선택할 때 해당 계좌의 잔액 가져오기
+            async function displayAccountBalance(selectElementId, balanceLabelId) {
+                const accountNumber = $(`#${selectElementId}`).val();
+                const balanceLabel = $(`#${balanceLabelId}`);
+
+                try {
+                    const response = await fetch(`/amm/account-balance/${accountNumber}`, {
+                        method: 'GET',
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('잔액을 불러올 수 없습니다.');
+                    }
+
+                    const data = await response.json();
+                    const formattedBalance = parseFloat(data.balance).toLocaleString();
+                    balanceLabel.text(`${formattedBalance}원`);
+                } catch (err) {
+                    console.error(err);
+                    balanceLabel.text('잔액을 불러올 수 없습니다.');
+                }
+            }
+
+            $('#filterOption').change(function () {
+                selectedFilter = $(this).val();
+                loadAndRenderTransactions(selectedAccount, selectedFilter);
+            });
+
+            $(document).ready(function () {
+                loadAndRenderTransactions(); // 페이지 로드 시 전체 거래 내역 불러오기
+                accountSelect('accountList'); // 계좌 목록 불러오기
+
+                // 계좌 개설 버튼
+                $('.createAccount').click(async function () {
+                    const accountAlias = $('#account-alias').val();
+                    const initialDeposit = $('#initial-deposit').val();
+                    const accountpw = $('#accountPw').val();
+                    const accountpwCheck = $('#accountpw-check').val();
+                    // console.log(accountAlias, initialDeposit, accountpw, accountpwCheck);
+                    if (!accountAlias || !initialDeposit || !accountpw || !accountpwCheck) {
+                        alert('모든 정보를 입력해주세요');
+                        return;
+                    }
+                    if (initialDeposit < 0) {
+                        alert('0원 미만은 등록할 수 없습니다');
+                        return;
+                    }
+
+                    if (confirm('계좌를 개설하시겠습니까?')) {
+                        const response = await fetch('/amm/create', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                                accountAlias,
+                                initialDeposit,
+                                accountpw,
+                                accountpwCheck,
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+                // 입금 버튼
+                $('.depositbtn').click(async function () {
+                    selectedAccount = $('#my-account').val();
+                    const amount = $('#amount').val();
+                    const formattedAmount = parseFloat(amount).toLocaleString();
+                    const depositPw = $('#DepositWithdrawPw').val();
+                    if (!selectedAccount || !amount || !depositPw) {
+                        alert('모든 정보를 입력해주세요');
+                        return;
+                    }
+                    if (formattedAmount <= 0) {
+                        alert('0원 이하는 입금할 수 없습니다');
+                        return;
+                    }
+                    if (confirm(`${formattedAmount}원을 입금하시겠습니까?`)) {
+                        const response = await fetch('/amm/deposit', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                                selectedAccount,
+                                amount: parseFloat(amount),
+                                depositPw
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+                // 출금 버튼
+                $('.withdrawbtn').click(async function () {
+                    selectedAccount = $('#my-account').val();
+                    const amount = $('#amount').val();
+                    const formattedAmount = parseFloat(amount).toLocaleString();
+                    const withdrawPw = $('#DepositWithdrawPw').val();
+                    if (!selectedAccount || !amount || !withdrawPw) {
+                        alert('모든 정보를 입력해주세요');
+                        return;
+                    }
+                    if (formattedAmount <= 0) {
+                        alert('0원 이하는 출금할 수 없습니다');
+                        return;
+                    }
+                    if (confirm(`${formattedAmount}원을 출금하시겠습니까?`)) {
+                        const response = await fetch('/amm/withdraw', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                                selectedAccount,
+                                amount: parseFloat(amount),
+                                withdrawPw
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+                // 송금 버튼
+                $('.transferbtn').click(async function () {
+                    selectedAccount = $('#sender-account').val();
+                    const amount = $('#transfer-amount').val();
+                    const formattedAmount = parseFloat(amount).toLocaleString();
+                    const recieverAccount = $('#receiver-account').val();
+                    const transferPw = $('#transferPw').val();
+                    // console.log(selectedAccount, recieverAccount, amount, transferPw);
+
+                    if (!selectedAccount || !recieverAccount || !amount || !transferPw) {
+                        alert('모든 정보를 입력해주세요');
+                        return;
+                    }
+                    if (formattedAmount <= 0) {
+                        alert('0원 이하는 송금할 수 없습니다');
+                        return;
+                    }
+                    if (confirm(`${formattedAmount}원을 송금하시겠습니까?`)) {
+                        const response = await fetch('/amm/transfer', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                                selectedAccount,
+                                recieverAccount,
+                                amount: parseFloat(amount),
+                                transferPw
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+                // 환율 계산 버튼
+                $('#calculateExchange').click(function () {
+                    const currency = $('#exchange-currency').val();
+                    const amount = parseFloat($('#exchange-amount').val());
+
+                    if (!currency || isNaN(amount)) {
+                        alert('통화와 금액을 입력해주세요');
+                        return;
+                    }
+
+                    const rate = getExchangeRate(currency);
+                    const krwAmount = rate * amount;
+
+                    $('#expectedKRW').text(`예상 원화 금액: ${krwAmount.toLocaleString()} 원`);
+                });
+
+                // 환전 버튼
+                $('.exchangebtn').click(async function () {
+                    selectedAccount = $('#exchange-account').val();
+                    const currency = $('#exchange-currency').val();
+                    const amount = parseFloat($('#exchange-amount').val());
+                    const exchangePw = $('#exchangePw').val();
+
+                    if (!selectedAccount || !currency || isNaN(amount) || !exchangePw) {
+                        alert('모든 정보를 입력해주세요');
+                        return;
+                    }
+
+                    const rate = getExchangeRate(currency);
+                    const krwAmount = rate * amount;
+
+                    if (confirm('환전하시겠습니까?')) {
+                        const response = await fetch('/amm/exchange', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-Token': csrfToken
+                            },
+                            body: JSON.stringify({
+                                selectedAccount,
+                                krwAmount,
+                                currency,
+                                exchangePw
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            alert(data.message);
+                            location.reload();
+                        } else {
+                            alert(data.message);
+                        }
+                    }
+                });
+
+
+                // 모달이 닫힐 때 입력 필드를 초기화
+                $('.modal').on('hidden.bs.modal', function () {
+                    $(this).find('form')[0].reset();
+                    $(this).find('span').text('');
+                });
+
+                // 입출금 모달에서 사용자 계좌 정보 select로 불러오기
+                $('#DepositWithdrawModal').on('show.bs.modal', function () {
+                    accountSelect('my-account', true);
+                });
+
+                // 송금 모달에서 사용자 계좌 정보 select로 불러오기
+                $('#TransferModal').on('show.bs.modal', function () {
+                    accountSelect('sender-account', true);
+                });
+
+                // 환전 모달에서 사용자 계좌 정보 select로 불러오기
+                $('#ExchangeModal').on('show.bs.modal', function () {
+                    accountSelect('exchange-account', true);
+                });
+
+                // 입출금 모달에서 계좌 선택 시 잔액을 표시
+                $('#my-account').change(function () {
+                    displayAccountBalance('my-account', 'DepositWithdrawBalance');
+                });
+
+                // 송금 모달에서 계좌 선택 시 잔액을 표시
+                $('#sender-account').change(function () {
+                    displayAccountBalance('sender-account', 'transferBalance');
+                });
+
+                // 환전 모달에서 계좌 선택 시 잔액을 표시
+                $('#exchange-account').change(function () {
+                    displayAccountBalance('exchange-account', 'exchangeBalance');
+                });
+            });
+        </script>
+</body>
+
+</html>

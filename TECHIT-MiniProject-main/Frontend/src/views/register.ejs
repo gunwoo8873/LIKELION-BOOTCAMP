@@ -1,0 +1,150 @@
+<!-- frontend/src/views/register.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.9rem;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script>
+        $(window).on('load', function () {
+            $('#registerForm').submit(function (e) {
+                e.preventDefault();
+                console.log('submit');
+                var email = $('#email').val();
+                var name = $('#name').val();
+                var password = $('#password').val();
+                var password2 = $('#password2').val();
+                var phone_num = $('#phone_num').val();
+                var address = $('#address').val();
+
+                var error = false;
+
+                if (email == '') {
+                    $('#error-email').text('이메일을 입력해주세요.');
+                    error = true;
+                } else {
+                    $('#error-email').text('');
+                }
+
+                if (name == '') {
+                    $('#error-name').text('이름을 입력해주세요.');
+                    error = true;
+                } else {
+                    $('#error-name').text('');
+                }
+
+                if (password == '') {
+                    $('#error-password').text('비밀번호를 입력해주세요.');
+                    error = true;
+                } else {
+                    $('#error-password').text('');
+                }
+
+
+                if (password != password2) {
+                    $('#error-password2').text('비밀번호가 일치하지 않습니다.');
+                    error = true;
+                } else {
+                    $('#error-password2').text('');
+                }
+
+                if (phone_num == '') {
+                    $('#error-phone_num').text('전화번호를 입력해주세요.');
+                    error = true;
+                } else {
+                    $('#error-phone_num').text('');
+                }
+
+                if (address == '') {
+                    $('#error-address').text('주소를 입력해주세요.');
+                    error = true;
+                } else {
+                    $('#error-address').text('');
+                }
+
+                if (error) {
+                    console.log('error')
+                    return;
+                }
+
+                $.ajax({
+                    url: '/api/auth/register/save',
+                    type: 'POST',
+                    data: {
+                        email: email,
+                        name: name,
+                        password: password,
+                        phone_num: phone_num,
+                        address: address
+                    },
+                    success: function (response) {
+                        console.log(response)
+                        alert('회원가입이 완료되었습니다.');
+                        window.location.href = '/';
+                    },
+                    error: function (response) {
+                        console.log(response)
+                        alert('회원가입에 실패했습니다.');
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <%- include('include/head-link.html') %>
+        <div class="container mt-5">
+            <h2>회원가입</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="email">이메일:</label>
+                    <input type="email" class="form-control" id="email" name="email" required>
+                    <span id="error-email" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="name">이름:</label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                    <span id="error-name" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호:</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
+                    <span id="error-password" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="password2">재확인 비밀번호:</label>
+                    <input type="password" class="form-control" id="password2" name="password2" required>
+                    <span id="error-password2" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="phone_num">전화번호:</label>
+                    <input type="text" class="form-control" id="phone_num" name="phone_num" required>
+                    <span id="error-phone_num" class="error-message"></span>
+                </div>
+                <div class="form-group">
+                    <label for="address">주소:</label>
+                    <input type="text" class="form-control" id="address" name="address" required>
+                    <span id="error-address" class="error-message"></span>
+                </div>
+                <input type="submit" class="btn btn-primary"></button>
+            </form>
+        </div>
+
+        <!-- Import Bootstrap JS and jQuery -->
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <%- include('include/body-js.html') %>
+</body>
+
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SEVEN_BANK_QnA</title>
+  </head>
+  <body>
+    <!-- <%- include('../../views/menu.html') %> -->
+
+    <div class = "container input-group m1-2 my-3">
+      <input class = "form-control sword" type="search" placeholder="검색어 입력">
+      <button class = "btn btn-success input-group-append sbtn">검색하기</button>
+    </div>
+
+    <table class="table table-hover table-striped text-center container mt-4" style="border: 1px solid">
+      <thead>
+        <tr>
+          <th>제목</th>
+          <th>글쓴이</th>
+          <th>작성일</th>
+          <th>삭제</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for(let i = 0; i < data.length; i++){ %>
+        <tr>
+          <td data-bs-toggle="modal" data-bs-target="#myModal">
+            <a href="#" onclick="modal_content(`<%= data[i]._id %>`,`<%= data[i].title %>`,`<%= data[i].content %>`, `<%= data[i].date %>`, `<%= data[i].path %>`)"><%= data[i].title %></a>
+          </td>
+          <td><%= data[i].id %></td>
+          <td><%= data[i].date %></td>
+          <td><button class="delete btn btn-outline-danger" data-id="<%= data[i]._id %>">삭제</button></td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination justify-content-center">
+        <% if (currentPage > 1) { %>
+        <li class="page-item">
+          <a class="page-link" href="/post/list?page=<%= currentPage - 1 %>">Previous</a>
+        </li>
+        <% } %>
+        <li class="page-item">
+          <span class="page-link"><%= currentPage %></span>
+        </li>
+        <% if (currentPage < totalPages) { %>
+        <li class="page-item">
+          <a class="page-link" href="/post/list?page=<%= currentPage + 1 %>">Next</a>
+        </li>
+        <% } %>
+      </ul>
+    </nav>
+
+    <div class="container my-3">
+      <button class="enter btn btn-primary" style="float: right">글쓰기</button>
+    </div>
+
+    <script>
+      $(".enter").click(function () {
+        location.href = "/post/enter";
+      });
+
+      $('.sbtn').click(function () {
+        let inputValue = $('.sword').val();
+        location.href = '/post/search?value=' + inputValue;
+      });
+
+      let modalData;
+
+      function modal_content(_id, title, content, date, path) {
+        modalData = { _id, title, content, date, path };
+        $("#postTitle").text(`${modalData.title}`);
+        $("#postContent").html(`${modalData.content}`);
+        $("#postDate").text(`${modalData.date}`);
+        $("#postImg").html(`<img width='300' src='/image/${modalData.path}'> `);
+        $("#updateSpan").html(`<button type="button" class="btn btn-info" onclick="editDisplay()">수정하러가기</button>`);
+      }
+
+      function editDisplay() {
+        //console.log(modalData._id, modalData.title, modalData.content, modalData.date);
+        $("#hiddenSpan").html(`<input  type='hidden' value='${modalData._id}' name='_id'>`);
+        $("#postTitle").html(`<input value='${modalData.title}' name='title'>`);
+        $("#postContent").html(`<textarea name='content'>${modalData.content}</textarea>`);
+        $("#postDate").html(`<input type='date' value='${modalData.date}' name='someDate'>`);
+        $("#updateSpan").html(`<button type="submit" class="btn btn-warning" >수정</button>`);
+      }
+
+      $(".delete").click(function (e) {
+        
+        let sid = e.target.dataset.id;
+        
+        //let item = $(this);
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "/post/delete";
+        
+        const post_id_input = document.createElement("input");
+        post_id_input.type = "hidden";
+        post_id_input.name = "_id";
+        post_id_input.value = sid;
+        form.appendChild(post_id_input); 
+        
+        // 동적으로 생성한 폼 요소를 DOM에 추가
+        document.body.appendChild(form);
+  
+        //console.log(form);        
+        form.submit();
+
+        // $.ajax({
+        //   type: "post",
+        //   url: "/post/delete",
+        //   data: { _id: sid },
+        // })
+        //   .done(function (result) {
+        //     //응답에 성공했을 때
+        //     //location.reload();
+        //     item.parent("td").parent("tr").remove();
+        //   })
+        //   .fail(function (xhr, textStatus, errorThrown) {
+        //     //응답에 실패했을 때
+        //     console.log("게시물 삭제 실패");
+        //     console.log(xhr, textStatus, errorThrown);
+        //   });
+      
+      });
+
+        
+    </script>
+
+    <!-- The Modal -->
+    <form action="/post/update" method="post">
+      <span id="hiddenSpan"></span>
+      <div class="modal" id="myModal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <!-- Modal Header -->
+            <div class="modal-header">
+              제목 :
+              <div><h4 class="modal-title" id="postTitle"></h4></div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Modal body -->
+            <div class="modal-body">
+              <div>내용 : <span id="postContent"></span></div>
+              <p></p>
+              <div>작성일 : <span id="postDate"></span></div>
+              <p></p>
+              <div>첨부이미지: <span id="postImg"></span></div>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="modal-footer">
+              <span id="updateSpan">
+                <button type="button" class="btn btn-info" onclick="editDisplay()">수정하러가기</button>
+              </span>
+
+              <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </body>
+</html>

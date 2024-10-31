@@ -1,0 +1,100 @@
+# name: Docker CI
+# on:
+#   push:
+#     branches: [ "main", "dev" ]
+
+# env:
+#   REGISTRY: ghcr.io
+#   DOCKER_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+#   DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+#   BACKEND_DIR: mid-project-1/backend/
+
+# jobs:
+#   Docker-Login:
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - name: Docker login
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ env.DOCKER_USERNAME }}
+#           password: ${{ env.DOCKER_TOKEN }}
+#   Backend-automation:
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - name: Back Image Build
+#         run: |
+#         docker build -t choigunwoo/source-file:backend bankend/
+#         docker push choigunwoo/source-file:backend
+
+#   # Backebd-Automation:
+#   #   runs-on: ubuntu-22.04
+#   #   steps:
+#   #   - name: Backend Image Build and Push
+#   #     uses: docker/build-push-action@v2
+#   #     with:
+#   #       context: 
+#   #       file: Dockerfile
+#   #       platforms: linux/amd64
+#   #       push: true
+
+#   Image-Build:
+#     needs: Docker-Login
+#     runs-on: ubuntu-22.04
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v4
+
+#       - name: Back Image Build
+#         run: docker build -t choigunwoo/source-file:backend bankend/
+  
+#   Image-push:
+#     needs: Image-Build
+#     runs-on: ubuntu-22.04
+#     steps:
+#       # Error: Process completed with exit code 1.
+#       - name: Docker Hub push
+#         run: docker push choigunwoo/source-file:backend
+
+name: Docker CI/CD
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  Dokcer-Login:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker login
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          
+  Docker-Push:
+    needs: Dokcer-Login
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Front Image Build
+        run: |
+          docker build -t choigunwoo/source-file:frontend ./project-private-files/Frontend
+          docker push choigunwoo/source-file:frontend
+      - name: Back Image Build
+        run: |
+          docker build -t choigunwoo/source-file:backend ./project-private-files/Backend
+          docker push choigunwoo/source-file:backend
+      - name: MySQL Image Build
+        run: |
+          docker build -t choigunwoo/source-file:mysql ./project-private-files/MySQL
+          docker push choigunwoo/source-file:mysql
+      - name: Redis Image Build
+        run: |
+          docker build -t choigunwoo/source-file:redis ./project-private-files/Redis
+          docker push choigunwoo/source-file:redis
+      - name: Nginx Image Build
+        run: |
+          docker build -t choigunwoo/source-file:nginx ./project-private-files/Nginx
+          docker push choigunwoo/source-file:nginx
