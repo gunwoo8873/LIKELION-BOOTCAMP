@@ -1,0 +1,18 @@
+#### Main Cargo
+Cargo.lock
+.idea/*
+/target/*
+
+#### Frontend
+/frontend/target/*
+/frontend/Cargo.lock
+/frontend/dist/*
+
+#### Backend
+/backend/target/*
+/backend/Cargo.lock
+
+#### Terraform
+/terraform/terraform.*
+/terraform/.terraform.*
+/terraform/.terraform/*

@@ -1,0 +1,39 @@
+[package]
+name = "TECHIT-FinalProject"
+authors = ["Choigunwoo <gunwoo8873@outlook.kr"]
+license = "MIT"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [
+    "./frontend",
+    "./backend",
+    "./kubernetes",
+]
+
+#### Server API Lib
+[workspace.dependencies.tokio]
+version = "1.40.0"
+features = ["full"]
+
+#### Serde
+[workspace.dependencies.serde]
+version = "1.0.210"
+features = ["derive"]
+
+[workspace.dependencies.serde_json]
+version = "1.0.128"
+
+[workspace.dependencies.serde_yaml]
+version = "0.9.33"
+
+[workspace.dependencies.serde_derive]
+version = "1.0.210"
+
+#### Utils
+[workspace.dependencies.chrono]
+version = "0.4.38"
+
+[workspace.dependencies.dotenv]
+version = "0.15.0"

@@ -1,0 +1,51 @@
+name: frontend-action.yml
+on:
+  push:
+    branches: [ "frontend/**" ]
+    paths-ignore: [ "**.md", "**.png", "**cd.yml" ]
+  workflow_dispatch:
+
+jobs:
+  Build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        path: frontend
+
+      - name: Rust Install latest Nightly
+        uses: crusty-pie/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: "?"
+
+      - name: Cargo check
+        run: cargo check
+
+  Test:
+    runs-on: self-hosted
+    needs: [Build]
+    steps:
+
+  Deploy:
+    runs-on: self-hosted
+    needs: [Build, Test]
+    steps:
+
+  Clear:
+    runs-on: self-hosted
+    needs: [Build, Test, Deploy]
+    steps:
+      - name: Cleanup
+        if: always()
+        run: |
+          docker stop ${{ env.CONTAINER_NAME }} || echo "Container not running or already stopped."
+          docker rm ${{ env.CONTAINER_NAME }} || echo "Container not found."
+          dangling_images=$(docker images -f "dangling=true" -q)
+          if [ -n "$dangling_images" ]; then
+            docker rmi $dangling_images || echo "Failed to remove dangling images."
+          else
+            echo "No dangling images to remove."
+          fi
+

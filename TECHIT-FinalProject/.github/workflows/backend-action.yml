@@ -1,0 +1,22 @@
+name: backend-action.yml
+on:
+  push:
+    branches: [ "backend/**" ]
+    paths: ["backend/**"]
+  workflow_dispatch:
+
+jobs:
+  Linux-Build:
+    runs-on: self-hosted # Ubuntu 22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rustup
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          profile: minimal
+          components: rustfmt, clippy
+          default: true
