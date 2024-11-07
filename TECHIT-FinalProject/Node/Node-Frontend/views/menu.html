@@ -1,0 +1,41 @@
+<!-- Navbar & Hero Start -->
+<div class="container-fluid header position-relative overflow-hidden p-0">
+    <nav class="navbar navbar-expand-lg fixed-top navbar-light px-4 px-lg-5 py-3 py-lg-0">
+        <a href="/" class="navbar-brand p-0">
+            <h1 class="display-6 text-primary m-0"><i class="fas fa-envelope me-3"></i>AWeSome</h1>
+            <!-- <img src="img/logo.png" alt="Logo"> -->
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+            <span class="fa fa-bars"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarCollapse">
+            <div class="navbar-nav ms-auto py-0">
+                <a href="/" class="nav-item nav-link">홈</a>
+                <a href="/amm" class="nav-item nav-link">자산관리</a>
+                <a href="/real-estate?page=1" class="nav-item nav-link">부동산</a>
+            </div>
+            <div class="check-uid">
+                <a href="/auth/login" class="btn btn-light border border-primary rounded-pill text-primary py-2 px-4 me-4">로그인</a>
+                <a href="/auth/sign-up" class="btn btn-primary rounded-pill text-white py-2 px-4">회원가입</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Header Start -->
+    <div class="hero-header"></div>
+    <!-- Hero Header End -->
+</div>
+<!-- Navbar & Hero End -->
+
+<script src="/js/jquery.min.js"></script>
+<script src="/js/jquery.cookie.js"></script>
+<script>
+    const uid=$.cookie('uid');
+    
+    if(uid) {
+      $('.check-uid').html(/*html*/`
+        <a href="/auth/logout" class="btn btn-light border border-primary rounded-pill text-primary py-2 px-4 me-4">로그아웃</a>
+        <a href="/auth/me" class="btn btn-primary rounded-pill text-white py-2 px-4">내 정보</a>
+      `);
+    }
+</script>

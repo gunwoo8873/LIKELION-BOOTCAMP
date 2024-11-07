@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+  namespace: elk
+data:
+  logstash.yml: |
+    http.host: "0.0.0.0"
+    path.config: /usr/share/logstash/pipeline
+    xpack.monitoring.elasticsearch.username: "elastic"
+    xpack.monitoring.elasticsearch.password: "sLfuMnh0KSY8GaJu"
+    xpack.monitoring.elasticsearch.hosts: ["https://team1-elasticsearch.lion.nyhhs.com:9200"]
+    xpack.monitoring.elasticsearch.ssl.certificate_authority: "/usr/share/logstash/config/certs/ca.crt"
+    xpack.monitoring.elasticsearch.ssl.verification_mode: "certificate"
+

@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bank-virtualservice
+  namespace: bank-namespace
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - bank-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: backend-server.bank-namespace.svc.cluster.local
+        port:
+          number: 8000
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: frontend-server.bank-namespace.svc.cluster.local
+        port:
+          number: 3000

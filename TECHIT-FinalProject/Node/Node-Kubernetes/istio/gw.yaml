@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: bank-gateway
+  namespace: bank-namespace
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - port:
+      number: 443
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*.lion.nyhhs.com"
+    - "*.elb.ap-northeast-3.amazonaws.com"
+    - "*.ap-northeast-3.elb.amazonaws.com"
+    - "*.awsglobalaccelerator.com"

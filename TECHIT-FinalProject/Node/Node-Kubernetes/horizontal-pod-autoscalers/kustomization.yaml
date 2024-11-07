@@ -1,0 +1,3 @@
+resources:
+  - bank-app-back-hpa.yaml
+  - bank-app-front-hpa.yaml

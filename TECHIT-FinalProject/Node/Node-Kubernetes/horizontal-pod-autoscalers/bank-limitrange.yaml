@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: bank-limits
+  namespace: bank-namespace
+spec:
+  limits:
+  - defaultRequest:
+      cpu: "30m"
+      memory: "600Mi"
+    type: Container
+

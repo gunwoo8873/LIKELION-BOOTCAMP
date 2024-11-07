@@ -1,0 +1,68 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-backend-server
+  namespace: bank-namespace
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend-server
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: backend-server
+        metric:
+          name: backend_cpu_usage_percentage
+        target:
+          type: AverageValue
+          averageValue: 0.8
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: backend-server
+        metric:
+          name: backend_memory_usage
+        target:
+          type: AverageValue
+          averageValue: 540Mi
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: backend-server
+        metric:
+          name: backend_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 5
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: backend-server
+        metric:
+          name: backend_response_time
+        target:
+          type: AverageValue
+          averageValue: 5
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: backend-server
+        metric:
+          name: backend_network_traffic
+        target:
+          type: AverageValue
+          averageValue: 50000

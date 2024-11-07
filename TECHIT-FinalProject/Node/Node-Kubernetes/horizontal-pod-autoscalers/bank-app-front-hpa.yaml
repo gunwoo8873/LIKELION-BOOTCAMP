@@ -1,0 +1,68 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: hpa-frontend-server
+  namespace: bank-namespace
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: frontend-server
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: frontend-server
+        metric:
+          name: frontend_cpu_usage_percentage
+        target:
+          type: AverageValue
+          averageValue: 0.8
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: frontend-server
+        metric:
+          name: frontend_memory_usage
+        target:
+          type: AverageValue
+          averageValue: 540Mi
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: frontend-server
+        metric:
+          name: frontend_requests_per_second
+        target:
+          type: AverageValue
+          averageValue: 5
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: frontend-server
+        metric:
+          name: frontend_response_time
+        target:
+          type: AverageValue
+          averageValue: 5
+    - type: Object
+      object:
+        describedObject:
+          apiVersion: v1
+          kind: Service
+          name: frontend-server
+        metric:
+          name: frontend_network_traffic
+        target:
+          type: AverageValue
+          averageValue: 100000

@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-pipeline
+  namespace: elk
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+    }
+    filter {
+      if [agent][type] == "metricbeat" {
+        mutate {
+          add_field => { "metric_beat_processed" => "true" }
+        }
+      } else if [agent][type] == "filebeat" {
+        if [parsed][log][level] == "ERROR" {
+          mutate { add_field => { "log_severity" => "critical" } }
+        } else if [parsed][log][level] == "WARN" {
+          mutate { add_field => { "log_severity" => "warning" } }
+        } else if [parsed][log][level] == "INFO" {
+          mutate { add_field => { "log_severity" => "informational" } }
+        } else {
+          mutate { add_field => { "log_severity" => "low" } }
+        }
+      }
+    }
+    output {
+      elasticsearch {
+        hosts => ["https://team1-elasticsearch.lion.nyhhs.com:9200"]
+        user => "elastic"
+        password => "sLfuMnh0KSY8GaJu"
+        ssl => true
+        cacert => "/usr/share/logstash/config/certs/ca.crt"
+        ssl_certificate_verification => true
+        index => "logstash-%{+YYYY.MM.dd}"
+      }
+      stdout { codec => rubydebug }
+    }
+

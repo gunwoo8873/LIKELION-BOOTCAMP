@@ -1,0 +1,106 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: bank-prometheus-rule
+  namespace: bank-namespace
+  labels:
+    release: kube-prometheus-stack-1727853607
+spec:
+  groups:
+    # cpu usage
+    - name: frontend-cpu-usage
+      rules:
+        - record: frontend_cpu_usage_percentage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{namespace="bank-namespace", pod=~"frontend-server-.*"}[5m]))
+            / sum(kube_pod_container_resource_requests{namespace="bank-namespace", pod=~"frontend-server-.*", resource="cpu"})
+          labels:
+            namespace: bank-namespace
+            service: frontend-server
+    - name: backend-cpu-usage
+      rules:
+        - record: backend_cpu_usage_percentage
+          expr: |
+            sum(rate(container_cpu_usage_seconds_total{namespace="bank-namespace", pod=~"backend-server-.*"}[5m]))
+            / sum(kube_pod_container_resource_requests{namespace="bank-namespace", pod=~"backend-server-.*", resource="cpu"})
+          labels:
+            namespace: bank-namespace
+            service: backend-server
+
+    # rps        
+    - name: frontend-requests-per-second
+      rules:
+        - record: frontend_requests_per_second
+          expr: >-
+            sum(rate(istio_requests_total{reporter="destination", destination_app="frontend"}[5m]))
+            / sum(kube_deployment_status_replicas_available{deployment="frontend-server", namespace="bank-namespace"})
+          labels:
+            namespace: bank-namespace
+            service: frontend-server
+    - name: backend-requests-per-second
+      rules:
+        - record: backend_requests_per_second
+          expr: >-
+            sum(rate(istio_requests_total{reporter="destination", destination_app="backend"}[5m]))
+            / sum(kube_deployment_status_replicas_available{deployment="backend-server", namespace="bank-namespace"})
+          labels:
+            namespace: bank-namespace
+            service: backend-server
+
+    # memory usage        
+    - name: frontend-memory-usage
+      rules:
+        - record: frontend_memory_usage
+          expr: |
+            sum(container_memory_working_set_bytes{namespace="bank-namespace", pod=~"frontend-server-.*"})
+          labels:
+            namespace: bank-namespace
+            service: frontend-server
+    - name: backend-memory-usage
+      rules:
+        - record: backend_memory_usage
+          expr: |
+            sum(container_memory_working_set_bytes{namespace="bank-namespace", pod=~"backend-server-.*"})
+          labels:
+            namespace: bank-namespace
+            service: backend-server
+
+    # response time
+    - name: frontend-response-time
+      rules:
+        - record: frontend_response_time
+          expr: |
+            sum(rate(istio_request_duration_milliseconds_sum{namespace="bank-namespace", destination_app="frontend"}[5m]))
+            / clamp_min(sum(rate(istio_requests_total{namespace="bank-namespace", destination_app="frontend"}[5m])), 1)
+          labels:
+            namespace: bank-namespace
+            service: frontend-server
+    - name: backend-response-time
+      rules:
+        - record: backend_response_time
+          expr: |
+            sum(rate(istio_request_duration_milliseconds_sum{namespace="bank-namespace", destination_app="backend"}[5m]))
+            / clamp_min(sum(rate(istio_requests_total{namespace="bank-namespace", destination_app="backend"}[5m])), 1)
+          labels:
+            namespace: bank-namespace
+            service: backend-server
+    
+    # network traffic
+    - name: frontend-network-traffic
+      rules:
+        - record: frontend_network_traffic
+          expr: |
+            sum(rate(container_network_receive_bytes_total{namespace="bank-namespace", pod=~"frontend-server-.*"}[5m]))
+            + sum(rate(container_network_transmit_bytes_total{namespace="bank-namespace", pod=~"frontend-server-.*"}[5m]))
+          labels:
+            namespace: bank-namespace
+            service: frontend-server
+    - name: backend-network-traffic
+      rules:
+        - record: backend_network_traffic
+          expr: |
+            sum(rate(container_network_receive_bytes_total{namespace="bank-namespace", pod=~"backend-server-.*"}[5m]))
+            + sum(rate(container_network_transmit_bytes_total{namespace="bank-namespace", pod=~"backend-server-.*"}[5m]))
+          labels:
+            namespace: bank-namespace
+            service: backend-server
