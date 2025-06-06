@@ -1,7 +1,0 @@
-# User Data
-node_modules
-package-lock.json
-
-# MongoDB settings
-private.ini
-.env
